@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Members</h2>
+  <a href="{{ url_for('add_member') }}" class="btn btn-primary">+ Add Member</a>
+</div>
+
+<div class="card p-3 mb-3">
+  <form class="row g-2" method="get">
+    <div class="col-md-4">
+      <input type="text"
+             name="q"
+             class="form-control"
+             placeholder="Search by name, phone, or email..."
+             value="{{ q or '' }}">
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-secondary" type="submit">Search</button>
+    </div>
+    {% if q %}
+    <div class="col-auto">
+      <a href="{{ url_for('members') }}" class="btn btn-outline-light">Clear</a>
+    </div>
+    {% endif %}
+  </form>
+</div>
+
+{% if members %}
+  <div class="card p-3">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Trainer</th>
+          <th>Phone</th>
+          <th>Email</th>
+          <th>Plan</th>
+          <th>Status</th>
+          <th>Visits</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for m in members %}
+        <tr>
+          <td>{{ m.member_id }}</td>
+          <td>{{ m.name }}</td>
+          <td>
+            {% if m.trainer_name %}
+              {{ m.trainer_name }}
+            {% else %}
+              <span class="text-warning">Not Assigned</span>
+            {% endif %}
+          </td>
+          <td>{{ m.phone or '-' }}</td>
+          <td>{{ m.email or '-' }}</td>
+          <td>
+            {{ m.membership_plan or '-' }}<br>
+            <small class="text-muted">
+              End: {{ m.membership_end_date or '-' }}
+            </small>
+          </td>
+          <td>
+            {% if m.membership_status == 'Expired' %}
+              <span class="badge bg-danger">{{ m.membership_status }}</span>
+            {% elif m.membership_status == 'Expiring Soon' %}
+              <span class="badge bg-warning text-dark">{{ m.membership_status }}</span>
+            {% else %}
+              <span class="badge bg-success">{{ m.membership_status }}</span>
+            {% endif %}
+          </td>
+          <td>{{ m.visit_count }}</td>
+          <td>
+            <a href="{{ url_for('health_metrics', member_id=m.member_id) }}"
+               class="btn btn-sm btn-primary mb-1">
+              Health
+            </a>
+            <form method="post"
+                  action="{{ url_for('delete_member', member_id=m.member_id) }}"
+                  style="display:inline;"
+                  onsubmit="return confirm('Delete this member and all related data?');">
+              <button class="btn btn-sm btn-outline-danger mb-1" type="submit">
+                Delete
+              </button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p>No members found.</p>
+{% endif %}
+{% endblock %}

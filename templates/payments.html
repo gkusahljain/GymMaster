@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Payments</h2>
+  <a href="{{ url_for('add_payment') }}" class="btn btn-primary">+ Add Payment</a>
+</div>
+
+{% if payments %}
+  <div class="card p-3">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Member</th>
+          <th>Amount (₹)</th>
+          <th>Date</th>
+          <th>Mode</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for p in payments %}
+        <tr>
+          <td>{{ p.payment_id }}</td>
+          <td>{{ p.member_name }} ({{ p.member_id }})</td>
+          <td>{{ p.amount }}</td>
+          <td>{{ p.payment_date }}</td>
+          <td>{{ p.payment_mode }}</td>
+          <td>
+            {% if p.status == 'paid' %}
+              <span class="badge bg-success">Paid</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">Pending</span>
+            {% endif %}
+          </td>
+          <td>
+            <form method="post"
+                  action="{{ url_for('delete_payment', payment_id=p.payment_id) }}"
+                  style="display:inline;"
+                  onsubmit="return confirm('Delete this payment record?');">
+              <button class="btn btn-sm btn-outline-danger" type="submit">
+                Delete
+              </button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p>No payments recorded yet.</p>
+{% endif %}
+{% endblock %}

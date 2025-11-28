@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card p-4">
+      <h3 class="card-title mb-3">Assign Trainer to Member</h3>
+      <form method="post" class="needs-validation" novalidate>
+        <div class="mb-3">
+          <label class="form-label">Member</label>
+          <select name="member_id" class="form-select" required>
+            <option value="">Select member</option>
+            {% for m in members %}
+              <option value="{{ m.member_id }}">{{ m.name }} (ID {{ m.member_id }})</option>
+            {% endfor %}
+          </select>
+          <div class="invalid-feedback">Please choose a member.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Trainer</label>
+          <select name="trainer_id" class="form-select" required>
+            <option value="">Select trainer</option>
+            {% for t in trainers %}
+              <option value="{{ t.trainer_id }}">
+                {{ t.name }}{% if t.specialization %} – {{ t.specialization }}{% endif %}
+              </option>
+            {% endfor %}
+          </select>
+          <div class="invalid-feedback">Please choose a trainer.</div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <a href="{{ url_for('trainers') }}" class="btn btn-outline-light">Back</a>
+          <button class="btn btn-primary" type="submit">Assign</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

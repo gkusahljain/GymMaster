@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="hero">
+  <div class="hero-content">
+    <div class="hero-title">GymMaster Admin Dashboard</div>
+    <div class="hero-subtitle">
+      Analyze daily attendance, revenue, and long-term trends. Only admin can access this view.
+    </div>
+  </div>
+</div>
+
+<div class="card p-3 mb-3">
+  <form method="post" class="row g-2 align-items-end needs-validation" novalidate>
+    <div class="col-auto">
+      <label class="form-label">Select Date</label>
+      <input type="date" name="date" class="form-control" value="{{ selected_date }}" required>
+      <div class="invalid-feedback">Please choose a date.</div>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-secondary" type="submit">Apply</button>
+    </div>
+  </form>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-3">
+    <div class="card p-3">
+      <h5 class="card-title">Members</h5>
+      <div class="stat-number">{{ total_members }}</div>
+      <small class="text-muted">Total registered members</small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3">
+      <h5 class="card-title">Trainers</h5>
+      <div class="stat-number">{{ total_trainers }}</div>
+      <small class="text-muted">Active trainers</small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3">
+      <h5 class="card-title">Check-ins ({{ selected_date }})</h5>
+      <div class="stat-number">{{ day_attendance }}</div>
+      <small class="text-muted">Attendance on selected date</small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3">
+      <h5 class="card-title">Revenue (₹) ({{ selected_date }})</h5>
+      <div class="stat-number">{{ "%.0f"|format(day_revenue) }}</div>
+      <small class="text-muted">Paid payments on selected date</small>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-6">
+    <div class="card p-3 h-100">
+      <h5 class="card-title">Recent Check-ins</h5>
+      {% if recent_attendance %}
+        <ul class="list-group list-group-flush">
+        {% for r in recent_attendance %}
+          <li class="list-group-item" style="background-color:#020617; color:#e5e7eb;">
+            {{ r.checkin_time }} – {{ r.name }}
+          </li>
+        {% endfor %}
+        </ul>
+      {% else %}
+        <p>No recent attendance records.</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card p-3 h-100">
+      <h5 class="card-title">Recent Payments</h5>
+      {% if recent_payments %}
+        <ul class="list-group list-group-flush">
+        {% for p in recent_payments %}
+          <li class="list-group-item" style="background-color:#020617; color:#e5e7eb;">
+            {{ p.payment_date }} – {{ p.member_name }} (₹{{ p.amount }})
+          </li>
+        {% endfor %}
+        </ul>
+      {% else %}
+        <p>No recent payments.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h5 class="card-title mb-3">Members Joined (Monthly)</h5>
+      <canvas id="membersChart"></canvas>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h5 class="card-title mb-3">Revenue (₹ per Month)</h5>
+      <canvas id="revenueChart"></canvas>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h5 class="card-title mb-3">Attendance (Last 7 Days)</h5>
+      <canvas id="attendanceChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', function () {
+    const memberLabels  = {{ member_month_labels | tojson }};
+    const memberValues  = {{ member_month_values | tojson }};
+    const revenueLabels = {{ revenue_month_labels | tojson }};
+    const revenueValues = {{ revenue_month_values | tojson }};
+    const attLabels     = {{ att_labels | tojson }};
+    const attValues     = {{ att_values | tojson }};
+
+    function replaceWithMessage(canvasId, message) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      canvas.replaceWith((() => {
+        const p = document.createElement('p');
+        p.className = 'text-muted mb-0';
+        p.textContent = message;
+        return p;
+      })());
+    }
+
+    const chartMissing = (typeof Chart === "undefined");
+
+    // Members chart
+    if (chartMissing) {
+      replaceWithMessage('membersChart', 'Charts disabled: Chart.js not loaded.');
+    } else if (memberLabels.length === 0) {
+      replaceWithMessage('membersChart', 'No member join data yet.');
+    } else {
+      new Chart(document.getElementById('membersChart'), {
+        type: 'line',
+        data: {
+          labels: memberLabels,
+          datasets: [{ label: 'Members', data: memberValues }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1,
+                precision: 0
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Revenue chart
+    if (chartMissing) {
+      replaceWithMessage('revenueChart', 'Charts disabled: Chart.js not loaded.');
+    } else if (revenueLabels.length === 0) {
+      replaceWithMessage('revenueChart', 'No revenue data yet.');
+    } else {
+      new Chart(document.getElementById('revenueChart'), {
+        type: 'bar',
+        data: {
+          labels: revenueLabels,
+          datasets: [{ label: 'Revenue (₹)', data: revenueValues }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0   // whole rupees
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Attendance chart
+    if (chartMissing) {
+      replaceWithMessage('attendanceChart', 'Charts disabled: Chart.js not loaded.');
+    } else if (attLabels.length === 0) {
+      replaceWithMessage('attendanceChart', 'No attendance data for last 7 days.');
+    } else {
+      new Chart(document.getElementById('attendanceChart'), {
+        type: 'line',
+        data: {
+          labels: attLabels,
+          datasets: [{ label: 'Check-ins', data: attValues }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1,
+                precision: 0
+              }
+            }
+          }
+        }
+      });
+    }
+  });
+</script>
+
+{% endblock %}

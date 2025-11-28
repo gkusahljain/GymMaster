@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card p-4">
+      <h3 class="card-title mb-3">Add Health Metrics – {{ member.name }}</h3>
+      <form method="post" class="needs-validation" novalidate>
+        <div class="mb-3">
+          <label class="form-label">Weight (kg)</label>
+          <input type="number"
+                 name="weight"
+                 class="form-control"
+                 placeholder="e.g. 70"
+                 step="0.1"
+                 min="1"
+                 max="500">
+          <div class="invalid-feedback">Please enter a valid weight (optional).</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">BMI (optional)</label>
+          <input type="number"
+                 name="bmi"
+                 class="form-control"
+                 placeholder="Leave blank to auto-calc from weight & height"
+                 step="0.1"
+                 min="5"
+                 max="80">
+          <div class="invalid-feedback">If provided, BMI must be between 5 and 80.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Resting Heart Rate (bpm)</label>
+          <input type="number"
+                 name="hr"
+                 class="form-control"
+                 placeholder="e.g. 72"
+                 min="30"
+                 max="220">
+          <div class="invalid-feedback">If provided, enter a value between 30 and 220.</div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <a href="{{ url_for('health_metrics', member_id=member.member_id) }}"
+             class="btn btn-outline-light">Cancel</a>
+          <button class="btn btn-primary" type="submit">Save Metrics</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

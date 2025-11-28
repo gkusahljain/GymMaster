@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Trainers</h2>
+  <a href="{{ url_for('add_trainer') }}" class="btn btn-primary">+ Add Trainer</a>
+</div>
+
+{% if trainers %}
+  <div class="card p-3">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Specialization</th>
+          <th>Phone</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for t in trainers %}
+        <tr>
+          <td>{{ t.trainer_id }}</td>
+          <td>{{ t.name }}</td>
+          <td>{{ t.specialization or '-' }}</td>
+          <td>{{ t.phone or '-' }}</td>
+          <td>
+            <form method="post"
+                  action="{{ url_for('delete_trainer', trainer_id=t.trainer_id) }}"
+                  style="display:inline;"
+                  onsubmit="return confirm('Delete this trainer and remove all their assignments?');">
+              <button class="btn btn-sm btn-outline-danger" type="submit">
+                Delete
+              </button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p>No trainers yet. Use “Add Trainer” to create one.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card p-4">
+      <h3 class="card-title mb-3">Add Trainer</h3>
+      <form method="post" class="needs-validation" novalidate>
+        <div class="mb-3">
+          <label class="form-label">Trainer Name</label>
+          <input type="text"
+                 name="name"
+                 class="form-control"
+                 placeholder="Enter trainer name"
+                 value="{{ form.name }}"
+                 required>
+          <div class="invalid-feedback">Trainer name is required.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Specialization</label>
+          <input type="text"
+                 name="specialization"
+                 class="form-control"
+                 placeholder="e.g. Strength, Yoga, Cardio"
+                 value="{{ form.specialization }}">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Phone Number</label>
+          <input type="tel"
+                 name="phone"
+                 class="form-control"
+                 placeholder="10-digit mobile (optional)"
+                 pattern="[6-9][0-9]{9}"
+                 value="{{ form.phone }}">
+          <div class="invalid-feedback">
+            If provided, phone must be a valid 10-digit Indian mobile number.
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <a href="{{ url_for('trainers') }}" class="btn btn-outline-light">Cancel</a>
+          <button class="btn btn-primary" type="submit">Save Trainer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

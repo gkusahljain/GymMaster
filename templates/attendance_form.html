@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card p-4">
+      <h3 class="card-title mb-3">Mark Attendance</h3>
+      <form method="post" class="needs-validation" novalidate>
+        <div class="mb-3">
+          <label class="form-label">Member</label>
+          <select name="member_id" class="form-select" required>
+            <option value="">Select member</option>
+            {% for m in members %}
+              <option value="{{ m.member_id }}">{{ m.name }} (ID {{ m.member_id }})</option>
+            {% endfor %}
+          </select>
+          <div class="invalid-feedback">Please choose a member.</div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <a href="{{ url_for('attendance') }}" class="btn btn-outline-light">Cancel</a>
+          <button class="btn btn-primary" type="submit">Mark Now</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
