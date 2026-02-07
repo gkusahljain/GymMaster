@@ -15,35 +15,22 @@
 - **Smart Diet Plans:** Creates meal plans tailored to dietary preferences (Veg, Non-Veg, Mixed).
 - **Powered by Ollama:** Utilizes local LLMs (Phi-3) for privacy-focused, offline-capable AI generation.
 
-### 📊 Admin Dashboard
-- **Real-time Stats:** Overview of total members, active trainers, daily attendance, and revenue.
-- **Visual Analytics:** Interactive charts for membership trends and revenue growth.
-- **Activity Logs:** Recent check-ins and payment history at a glance.
-
-### 📅 Attendance & scheduling
-- **Check-in System:** trainers can mark daily attendance for members.
-- **Trainer Assignment:** Assign personal trainers to specific members.
-
-### 💳 Financials
-- **Revenue Tracking:** Monitor daily and monthly earnings.
-- **Payment History:** Keep track of all transaction records.
-
 ## 📸 Screenshots
 
 ### Admin Dashboard
-![Admin Dashboard](static/screenshots/dashboard_admin.png)
+![Admin Dashboard](https://raw.githubusercontent.com/gkusahljain/GymMaster/main/static/screenshots/dashboard_admin.png)
 *Real-time overview of members, revenue, and daily attendance.*
 
 ### Member Management
-![Member List](static/screenshots/members_list.png)
+![Member List](https://raw.githubusercontent.com/gkusahljain/GymMaster/main/static/screenshots/members_list.png)
 *Efficiently manage members with search, filters, and status indicators.*
 
 ### AI Fitness Plan
-![AI Plan](static/screenshots/ai_plan_result.png)
+![AI Plan](https://raw.githubusercontent.com/gkusahljain/GymMaster/main/static/screenshots/ai_plan_result.png)
 *AI-generated personalized workout and diet plans based on member goals.*
 
 ### Login Screen
-![Login Page](static/screenshots/login_screen.png)
+![Login Page](https://raw.githubusercontent.com/gkusahljain/GymMaster/main/static/screenshots/login_screen.png)
 *Secure login for Admins and Trainers.*
 
 ---
