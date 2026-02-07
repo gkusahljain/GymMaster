@@ -1,12 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
+
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h2>Members</h2>
   <a href="{{ url_for('add_member') }}" class="btn btn-primary">+ Add Member</a>
 </div>
 
+<!-- SEARCH + FILTER CARD -->
 <div class="card p-3 mb-3">
-  <form class="row g-2" method="get">
+  <form class="row g-2 align-items-center" method="get">
+
+    <!-- SEARCH -->
     <div class="col-md-4">
       <input type="text"
              name="q"
@@ -14,14 +18,35 @@
              placeholder="Search by name, phone, or email..."
              value="{{ q or '' }}">
     </div>
+
     <div class="col-auto">
       <button class="btn btn-secondary" type="submit">Search</button>
     </div>
-    {% if q %}
+
+    {% if q or plan %}
     <div class="col-auto">
       <a href="{{ url_for('members') }}" class="btn btn-outline-light">Clear</a>
     </div>
     {% endif %}
+
+    <!-- PLAN FILTER BUTTONS -->
+    <div class="col-12 mt-2 d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('members', plan='Monthly', q=q) }}"
+         class="btn btn-sm {{ 'btn-primary' if plan=='Monthly' else 'btn-outline-primary' }}">
+        Monthly
+      </a>
+
+      <a href="{{ url_for('members', plan='Quarterly', q=q) }}"
+         class="btn btn-sm {{ 'btn-warning' if plan=='Quarterly' else 'btn-outline-warning' }}">
+        Quarterly
+      </a>
+
+      <a href="{{ url_for('members', plan='Yearly', q=q) }}"
+         class="btn btn-sm {{ 'btn-success' if plan=='Yearly' else 'btn-outline-success' }}">
+        Yearly
+      </a>
+    </div>
+
   </form>
 </div>
 
@@ -32,9 +57,10 @@
         <tr>
           <th>ID</th>
           <th>Name</th>
+          <th>Gender / Age</th>
+          <th>Weight (kg)</th>
+          <th>Diet</th>
           <th>Trainer</th>
-          <th>Phone</th>
-          <th>Email</th>
           <th>Plan</th>
           <th>Status</th>
           <th>Visits</th>
@@ -46,6 +72,10 @@
         <tr>
           <td>{{ m.member_id }}</td>
           <td>{{ m.name }}</td>
+          <td>{{ m.gender or '-' }} / {{ m.age or '-' }}</td>
+          <td>{{ m.current_weight_kg or '-' }}</td>
+          <td>{{ m.diet_preference or '-' }}</td>
+
           <td>
             {% if m.trainer_name %}
               {{ m.trainer_name }}
@@ -53,29 +83,44 @@
               <span class="text-warning">Not Assigned</span>
             {% endif %}
           </td>
-          <td>{{ m.phone or '-' }}</td>
-          <td>{{ m.email or '-' }}</td>
+
           <td>
             {{ m.membership_plan or '-' }}<br>
             <small class="text-muted">
               End: {{ m.membership_end_date or '-' }}
             </small>
           </td>
+
           <td>
             {% if m.membership_status == 'Expired' %}
-              <span class="badge bg-danger">{{ m.membership_status }}</span>
+              <span class="badge bg-danger">Expired</span>
             {% elif m.membership_status == 'Expiring Soon' %}
-              <span class="badge bg-warning text-dark">{{ m.membership_status }}</span>
+              <span class="badge bg-warning text-dark">Expiring Soon</span>
             {% else %}
-              <span class="badge bg-success">{{ m.membership_status }}</span>
+              <span class="badge bg-success">Active</span>
             {% endif %}
           </td>
+
           <td>{{ m.visit_count }}</td>
+
           <td>
             <a href="{{ url_for('health_metrics', member_id=m.member_id) }}"
                class="btn btn-sm btn-primary mb-1">
               Health
             </a>
+
+            <a href="{{ url_for('ai_plan', member_id=m.member_id) }}"
+               class="btn btn-sm btn-outline-info mb-1">
+              AI Plan
+            </a>
+
+            {% if m.membership_status == 'Expired' %}
+              <a href="{{ url_for('renew_member', member_id=m.member_id) }}"
+                 class="btn btn-sm btn-warning mb-1">
+                Renew
+              </a>
+            {% endif %}
+
             <form method="post"
                   action="{{ url_for('delete_member', member_id=m.member_id) }}"
                   style="display:inline;"
@@ -93,4 +138,5 @@
 {% else %}
   <p>No members found.</p>
 {% endif %}
+
 {% endblock %}

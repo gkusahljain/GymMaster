@@ -3,7 +3,12 @@
 <div class="row justify-content-center">
   <div class="col-md-4">
     <div class="card p-4">
-      <h3 class="login-title mb-4 text-center">Admin Login</h3>
+
+      <!-- UPDATED TITLE -->
+      <h3 style="color: #ffffff;" class="login-title mb-4 text-center">
+        Admin / Trainer Login
+      </h3>
+
       <form method="post" class="needs-validation" novalidate>
         <div class="mb-3">
           <label class="form-label">Username</label>
@@ -13,6 +18,7 @@
                  required>
           <div class="invalid-feedback">Username is required.</div>
         </div>
+
         <div class="mb-3">
           <label class="form-label">Password</label>
           <input name="password"
@@ -22,8 +28,17 @@
                  required>
           <div class="invalid-feedback">Password is required.</div>
         </div>
-        <button class="btn btn-primary w-100" type="submit">Login</button>
+
+        <button class="btn btn-primary w-100" type="submit">
+          Login
+        </button>
       </form>
+
+      <!-- OPTIONAL HELPER TEXT -->
+      <div class="text-center mt-3 text-muted" style="font-size: 0.9rem;">
+        Trainers and admins can login here
+      </div>
+
     </div>
   </div>
 </div>

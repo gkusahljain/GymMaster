@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="mb-4 text-white">Trainer Dashboard</h2>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <a href="{{ url_for('attendance') }}" class="card p-4 text-center text-white">
+      <h5>📅 Mark Attendance</h5>
+    </a>
+  </div>
+
+  <div class="col-md-4">
+    <a href="{{ url_for('members') }}" class="card p-4 text-center text-white">
+      <h5>👤 View Members</h5>
+    </a>
+  </div>
+
+  <div class="col-md-4">
+    <a href="{{ url_for('attendance_history') }}" class="card p-4 text-center text-white">
+      <h5>📊 Attendance History</h5>
+    </a>
+  </div>
+</div>
+
+{% endblock %}

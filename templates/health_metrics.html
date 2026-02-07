@@ -1,18 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
+
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h2>Health Profile – {{ member.name }} (ID {{ member.member_id }})</h2>
-  <a href="{{ url_for('members') }}" class="btn btn-outline-light">Back to Members</a>
+  <a href="{{ url_for('members') }}" class="btn btn-outline-light">
+    ← Back to Members
+  </a>
 </div>
 
 <div class="row g-3 mb-3">
+  <!-- MEMBER INFO -->
   <div class="col-md-6">
     <div class="card p-3">
       <h5 class="card-title mb-2">Member Info</h5>
+
       <p class="mb-1"><strong>Phone:</strong> {{ member.phone or '-' }}</p>
       <p class="mb-1"><strong>Email:</strong> {{ member.email or '-' }}</p>
       <p class="mb-1"><strong>Height:</strong> {{ member.height_cm or '-' }} cm</p>
       <p class="mb-1"><strong>Goal:</strong> {{ member.goal or '-' }}</p>
+
       <p class="mb-1"><strong>Trainer:</strong>
         {% if trainer %}
           {{ trainer }}
@@ -20,28 +26,56 @@
           <span class="text-warning">Not Assigned</span>
         {% endif %}
       </p>
-      <div class="mt-3 d-flex gap-2">
+
+      <!-- ACTION BUTTONS -->
+      <div class="mt-3 d-flex gap-2 flex-wrap">
+
+        <!-- ADD HEALTH METRIC -->
         <a href="{{ url_for('add_health_metric', member_id=member.member_id) }}"
            class="btn btn-primary btn-sm">
-          + Add Health Metric
+          ➕ Add Health Metric
         </a>
-        <form method="post"
-              action="{{ url_for('recommend', member_id=member.member_id) }}"
-              onsubmit="return confirm('Generate AI workout + meal plan for this member?');">
-          <button class="btn btn-secondary btn-sm" type="submit">
-            Generate AI Plan
+
+        <!-- SEND HEALTH SMS -->
+        {% if summary %}
+        <form method="POST"
+              action="{{ url_for('send_health_sms', member_id=member.member_id) }}">
+          <button type="submit" class="btn btn-success btn-sm">
+            📩 Send Health SMS
           </button>
         </form>
+        {% endif %}
+
+        <!-- SEND AI PLAN SMS -->
+        {% if ai_plan %}
+        <form method="POST"
+              action="{{ url_for('send_ai_sms', member_id=member.member_id) }}">
+          <button type="submit" class="btn btn-warning btn-sm">
+            🧠 Send AI Plan SMS
+          </button>
+        </form>
+        {% endif %}
+
       </div>
     </div>
   </div>
 
+  <!-- PROGRESS SUMMARY -->
   <div class="col-md-6">
     <div class="card p-3 h-100">
       <h5 class="card-title mb-2">Progress Summary</h5>
+
       {% if summary %}
-        <p class="mb-1"><strong>Latest BMI:</strong> {{ summary.latest_bmi or '-' }} ({{ summary.bmi_category }})</p>
-        <p class="mb-1"><strong>Latest Weight:</strong> {{ summary.latest_weight or '-' }} kg</p>
+        <p class="mb-1">
+          <strong>Latest BMI:</strong>
+          {{ summary.latest_bmi or '-' }} ({{ summary.bmi_category }})
+        </p>
+
+        <p class="mb-1">
+          <strong>Latest Weight:</strong>
+          {{ summary.latest_weight or '-' }} kg
+        </p>
+
         <p class="mb-1">
           <strong>Weight Change:</strong>
           {% if summary.weight_change is not none %}
@@ -50,22 +84,40 @@
             -
           {% endif %}
         </p>
-        <p class="mb-1"><strong>Last Record Date:</strong> {{ summary.last_record_date }}</p>
-        <p class="mb-1"><strong>Total Visits:</strong> {{ summary.total_visits }}</p>
-        <p class="mb-1"><strong>Last Visit:</strong> {{ summary.last_visit or '-' }}</p>
+
+        <p class="mb-1">
+          <strong>Last Record Date:</strong>
+          {{ summary.last_record_date }}
+        </p>
+
+        <p class="mb-1">
+          <strong>Total Visits:</strong>
+          {{ summary.total_visits }}
+        </p>
+
+        <p class="mb-1">
+          <strong>Last Visit:</strong>
+          {{ summary.last_visit or '-' }}
+        </p>
+
         <hr>
         <p class="mb-0">{{ summary.progress_text }}</p>
+
       {% else %}
-        <p>No health data yet. Add at least one record to see summary.</p>
+        <p class="text-muted">
+          No health data yet. Add at least one record to see summary.
+        </p>
       {% endif %}
     </div>
   </div>
 </div>
 
+<!-- HEALTH HISTORY -->
 <div class="row g-3">
   <div class="col-md-6">
     <div class="card p-3">
       <h5 class="card-title mb-3">Health Metrics History</h5>
+
       {% if metrics %}
         <table class="table table-hover align-middle mb-0">
           <thead>
@@ -77,14 +129,14 @@
             </tr>
           </thead>
           <tbody>
-          {% for m in metrics %}
+            {% for m in metrics %}
             <tr>
               <td>{{ m.record_date }}</td>
               <td>{{ m.weight_kg or '-' }}</td>
               <td>{{ m.bmi or '-' }}</td>
               <td>{{ m.resting_heart_rate or '-' }}</td>
             </tr>
-          {% endfor %}
+            {% endfor %}
           </tbody>
         </table>
       {% else %}
@@ -92,38 +144,6 @@
       {% endif %}
     </div>
   </div>
-
-  <div class="col-md-6">
-    <div class="card p-3">
-      <h5 class="card-title mb-3">AI Workout & Meal Plans</h5>
-      {% if recs %}
-        <div class="accordion" id="aiPlansAccordion">
-          {% for r in recs %}
-            <div class="accordion-item" style="background-color:#020617;">
-              <h2 class="accordion-header" id="heading{{ r.rec_id }}">
-                <button class="accordion-button collapsed" type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapse{{ r.rec_id }}"
-                        aria-expanded="false"
-                        aria-controls="collapse{{ r.rec_id }}">
-                  Plan on {{ r.recommendation_date }}
-                </button>
-              </h2>
-              <div id="collapse{{ r.rec_id }}"
-                   class="accordion-collapse collapse"
-                   aria-labelledby="heading{{ r.rec_id }}"
-                   data-bs-parent="#aiPlansAccordion">
-                <div class="accordion-body">
-                  <pre>{{ r.text }}</pre>
-                </div>
-              </div>
-            </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <p class="text-muted mb-0">No AI plans generated yet for this member.</p>
-      {% endif %}
-    </div>
-  </div>
 </div>
+
 {% endblock %}

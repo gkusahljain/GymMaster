@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>AI Weekly Plan & Tracker – {{ member.name }} (ID {{ member.member_id }})</h2>
+  <a href="{{ url_for('members') }}" class="btn btn-outline-light">
+    ← Back to Members
+  </a>
+</div>
+
+<div class="row g-3 mb-3">
+  <!-- MEMBER PROFILE -->
+  <div class="col-lg-4">
+    <div class="card p-3 h-100">
+      <h5 class="card-title">Member Profile</h5>
+
+      <p class="mb-1"><strong>Gender:</strong> {{ member.gender or '-' }}</p>
+      <p class="mb-1"><strong>Age:</strong> {{ member.age or '-' }}</p>
+      <p class="mb-1"><strong>Height:</strong> {{ member.height_cm or '-' }} cm</p>
+
+      <p class="mb-1"><strong>Weight:</strong>
+        {% if latest_metric and latest_metric.weight_kg %}
+          {{ latest_metric.weight_kg }} kg (latest)
+        {% else %}
+          {{ member.current_weight_kg or '-' }} kg
+        {% endif %}
+      </p>
+
+      <p class="mb-1"><strong>Goal:</strong> {{ member.goal or '-' }}</p>
+      <p class="mb-1"><strong>Diet:</strong> {{ member.diet_preference or '-' }}</p>
+
+      {% if latest_metric %}
+        <p class="mb-1"><strong>BMI:</strong> {{ latest_metric.bmi | round(2) }}</p>
+        <p class="mb-1"><strong>Resting HR:</strong> {{ latest_metric.resting_heart_rate }} bpm</p>
+      {% endif %}
+
+      <!-- ACTION BUTTONS -->
+      <div class="mt-3 d-grid gap-2">
+
+        <!-- GENERATE PLAN -->
+        <form method="post">
+          <input type="hidden" name="action" value="generate_plan">
+          <button class="btn btn-primary w-100" type="submit">
+            🔄 Generate / Refresh AI Plan
+          </button>
+        </form>
+
+        <!-- SEND AI PLAN SMS -->
+        {% if ai_plan %}
+        <form method="post"
+              action="{{ url_for('send_ai_sms', member_id=member.member_id) }}">
+          <button class="btn btn-success w-100" type="submit">
+            📩 Send AI Plan via SMS
+          </button>
+        </form>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+  <!-- AI PLAN -->
+  <div class="col-lg-8">
+    <div class="card p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="card-title mb-0">AI Workout & Meal Plan</h5>
+        {% if ai_plan %}
+          <span class="badge bg-primary">
+            {{ ai_plan.created_at.strftime("%Y-%m-%d %H:%M") if ai_plan.created_at else "" }}
+          </span>
+        {% endif %}
+      </div>
+
+      {% if ai_plan %}
+        <pre class="plan-text">
+{{ ai_plan.plan_text }}
+        </pre>
+
+        <p class="mt-2 mb-0 text-muted">
+          🎯 Target Calories: {{ ai_plan.calories }} kcal ·
+          🥩 Protein: {{ ai_plan.protein_g }} g ·
+          🍞 Carbs: {{ ai_plan.carbs_g }} g ·
+          🥑 Fat: {{ ai_plan.fats_g }} g
+        </p>
+      {% else %}
+        <p class="text-muted mb-0">
+          No AI plan generated yet. Click
+          <strong>Generate / Refresh AI Plan</strong>
+          to create one.
+        </p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- DAILY TRACKING -->
+<div class="row g-3">
+  <!-- NUTRITION -->
+  <div class="col-lg-6">
+    <div class="card p-3 h-100">
+      <h5 class="card-title">Today’s Nutrition – {{ today }}</h5>
+
+      <form method="post" class="row g-2 mb-3">
+        <input type="hidden" name="action" value="add_food">
+
+        <div class="col-md-4">
+          <input type="text" name="food_name" class="form-control" placeholder="Food item" required>
+        </div>
+        <div class="col-md-2">
+          <input type="number" min="0" name="calories" class="form-control" placeholder="kcal">
+        </div>
+        <div class="col-md-2">
+          <input type="number" step="0.1" min="0" name="protein" class="form-control" placeholder="P g">
+        </div>
+        <div class="col-md-2">
+          <input type="number" step="0.1" min="0" name="carbs" class="form-control" placeholder="C g">
+        </div>
+        <div class="col-md-2">
+          <input type="number" step="0.1" min="0" name="fats" class="form-control" placeholder="F g">
+        </div>
+
+        <div class="col-12 d-flex justify-content-end">
+          <button class="btn btn-secondary btn-sm" type="submit">➕ Add Food</button>
+        </div>
+      </form>
+
+      {% if food_entries %}
+        <ul class="list-group list-group-flush">
+          {% for f in food_entries %}
+            <li class="list-group-item bg-dark text-light">
+              {{ f.food_name }} – {{ f.calories }} kcal
+              <span class="text-muted">
+                (P: {{ f.protein_g }} g · C: {{ f.carbs_g }} g · F: {{ f.fats_g }} g)
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <p class="mt-2 mb-0">
+          <strong>Total:</strong>
+          {{ food_totals.total_cal }} kcal ·
+          P: {{ food_totals.total_protein }} g ·
+          C: {{ food_totals.total_carbs }} g ·
+          F: {{ food_totals.total_fats }} g
+          {% if target_calories %}
+            <br><span class="text-muted">Target: {{ target_calories }} kcal</span>
+          {% endif %}
+        </p>
+      {% else %}
+        <p class="text-muted mb-0">No food entries for today.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- WORKOUTS -->
+  <div class="col-lg-6">
+    <div class="card p-3 h-100">
+      <h5 class="card-title">Today’s Workouts – {{ today }}</h5>
+
+      <form method="post" class="row g-2 mb-3">
+        <input type="hidden" name="action" value="add_workout">
+
+        <div class="col-md-5">
+          <input type="text" name="workout_name" class="form-control" placeholder="Workout" required>
+        </div>
+        <div class="col-md-3">
+          <input type="number" min="0" name="duration" class="form-control" placeholder="Minutes">
+        </div>
+        <div class="col-md-3">
+          <input type="number" min="0" name="burned_calories" class="form-control" placeholder="kcal burned">
+        </div>
+
+        <div class="col-12 d-flex justify-content-end">
+          <button class="btn btn-secondary btn-sm" type="submit">➕ Add Workout</button>
+        </div>
+      </form>
+
+      {% if workout_entries %}
+        <ul class="list-group list-group-flush">
+          {% for w in workout_entries %}
+            <li class="list-group-item bg-dark text-light">
+              {{ w.workout_name }} – {{ w.duration_min }} min ({{ w.burned_calories }} kcal)
+            </li>
+          {% endfor %}
+        </ul>
+
+        <p class="mt-2 mb-0">
+          <strong>Total burned:</strong> {{ burned_total.total_burned }} kcal
+        </p>
+      {% else %}
+        <p class="text-muted mb-0">No workouts logged today.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
